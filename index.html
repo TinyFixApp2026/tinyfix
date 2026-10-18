@@ -1,0 +1,270 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TinyFix - Small problems, simple solutions</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #172033;
+    }
+
+    header {
+      background: #ffffff;
+      padding: 20px 7%;
+      border-bottom: 1px solid #e3e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo { font-size: 25px; font-weight: bold; color: #4568f5; }
+    .tagline { color: #64748b; font-size: 13px; }
+
+    main {
+      max-width: 850px;
+      margin: 55px auto;
+      padding: 0 20px;
+    }
+
+    .intro { text-align: center; margin-bottom: 35px; }
+    .intro h1 { font-size: clamp(32px, 6vw, 48px); margin-bottom: 12px; }
+    .intro p { color: #64748b; line-height: 1.6; }
+
+    .panel {
+      background: white;
+      border: 1px solid #e3e8f0;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 12px 35px #1e293b0b;
+    }
+
+    label { display: block; font-weight: bold; margin-bottom: 10px; }
+
+    textarea {
+      width: 100%;
+      min-height: 115px;
+      padding: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 12px;
+      font: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus { outline: 2px solid #9db0ff; border-color: #4568f5; }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 17px;
+      font: inherit;
+      font-weight: bold;
+    }
+
+    .primary { background: #4568f5; color: white; width: 100%; margin-top: 14px; }
+    .primary:hover { background: #3152d8; }
+    .examples { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 17px; }
+    .example { background: #eef2ff; color: #354bb5; font-size: 13px; }
+    #result { display: none; margin-top: 25px; }
+    #result h2 { margin-top: 0; }
+    #plan { padding-left: 0; list-style: none; }
+    #plan li { margin: 10px 0; }
+    #plan label { display: flex; align-items: flex-start; gap: 10px; font-weight: normal; line-height: 1.5; }
+    #plan input { margin-top: 5px; accent-color: #4568f5; }
+    .done { color: #64748b; text-decoration: line-through; }
+    .secondary { background: #eef2f7; color: #334155; margin-top: 12px; }
+    footer { text-align: center; padding: 25px; color: #64748b; font-size: 13px; }
+
+    @media (max-width: 550px) {
+      header { padding: 16px 5%; }
+      main { margin: 30px auto; }
+      .panel { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">✦ TinyFix</div>
+    <div class="tagline">Small problems. Simple solutions.</div>
+  </header>
+
+  <main>
+    <section class="intro">
+      <h1>What's bothering you today?</h1>
+      <p>Tell TinyFix what's going wrong. We'll turn it into small, manageable steps.</p>
+    </section>
+
+    <section class="panel">
+      <label for="problem">Describe your problem</label>
+      <textarea id="problem" placeholder="Example: My phone storage is full and I don't know what to delete..."></textarea>
+
+      <button class="primary" id="solve">Find my solution ✨</button>
+
+      <p><strong>Try an example:</strong></p>
+      <div class="examples">
+        <button class="example" data-problem="My phone storage is full">📱 Full phone storage</button>
+        <button class="example" data-problem="My computer is running slowly">💻 Slow computer</button>
+        <button class="example" data-problem="I have too many tasks to finish">📚 Too many tasks</button>
+        <button class="example" data-problem="I need to organize my room">🧹 Messy room</button>
+      </div>
+
+      <section id="result" aria-live="polite">
+        <hr>
+        <h2 id="resultTitle">Your action plan</h2>
+        <p id="resultIntro"></p>
+        <ul id="plan"></ul>
+        <p id="progress"></p>
+        <button class="secondary" id="reset">Start again ↻</button>
+      </section>
+    </section>
+  </main>
+
+  <footer>Made with care by TinyFix ✦</footer>
+
+  <script>
+    const problemInput = document.getElementById("problem");
+    const result = document.getElementById("result");
+    const plan = document.getElementById("plan");
+
+    const solutions = [
+      {
+        words: ["storage", "phone", "space"],
+        title: "Free up phone storage 📱",
+        intro: "Let's make some room without losing anything important.",
+        steps: [
+          "Check which apps and files use the most space in Settings.",
+          "Back up important photos and videos before removing anything.",
+          "Delete unwanted downloads and duplicate files.",
+          "Clear app caches using your phone's built-in settings, if available.",
+          "Check your free storage again."
+        ]
+      },
+      {
+        words: ["slow computer", "computer", "pc", "laptop"],
+        title: "Help your computer run better 💻",
+        intro: "Try these simple checks before changing advanced settings.",
+        steps: [
+          "Save your work and restart the computer.",
+          "Close apps and browser tabs you are not using.",
+          "Check free storage and remove only files you recognize and no longer need.",
+          "Install system updates from the computer's official settings.",
+          "If it is still slow, write down when the slowdown happens."
+        ]
+      },
+      {
+        words: ["tasks", "homework", "study", "work"],
+        title: "Make your tasks manageable 📚",
+        intro: "You don't need to do everything at once.",
+        steps: [
+          "Write down everything you need to finish.",
+          "Choose the most urgent or important task.",
+          "Break that task into a small first step.",
+          "Work on it for 15 minutes, then take a short break.",
+          "Choose your next step when you're ready."
+        ]
+      },
+      {
+        words: ["room", "messy", "clean", "organize"],
+        title: "Tidy your space 🧹",
+        intro: "Start small instead of trying to clean everything at once.",
+        steps: [
+          "Pick up rubbish and put it in the bin.",
+          "Put clothes in their proper place.",
+          "Collect dishes or cups and take them to the kitchen.",
+          "Clear one small surface, like your desk.",
+          "Put away the things you use most often."
+        ]
+      }
+    ];
+
+    function makePlan(problem) {
+      const text = problem.toLowerCase().trim();
+      if (!text) {
+        alert("Please describe your problem or choose an example.");
+        problemInput.focus();
+        return;
+      }
+
+      const match = solutions.find(solution =>
+        solution.words.some(word => text.includes(word))
+      );
+
+      const chosen = match || {
+        title: "Let's break it down 💡",
+        intro: "Here is a simple way to start with your problem.",
+        steps: [
+          "Describe exactly what is going wrong.",
+          "Think about what you want to happen instead.",
+          "Choose one small action you can safely try.",
+          "Try that action and see what changes.",
+          "If it doesn't help, ask someone you trust for advice or more information."
+        ]
+      };
+
+      document.getElementById("resultTitle").textContent = chosen.title;
+      document.getElementById("resultIntro").textContent = chosen.intro;
+      plan.innerHTML = "";
+
+      chosen.steps.forEach((step, index) => {
+        const li = document.createElement("li");
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        const span = document.createElement("span");
+
+        checkbox.type = "checkbox";
+        span.textContent = (index + 1) + ". " + step;
+
+        checkbox.addEventListener("change", () => {
+          span.classList.toggle("done", checkbox.checked);
+          updateProgress();
+        });
+
+        label.append(checkbox, span);
+        li.appendChild(label);
+        plan.appendChild(li);
+      });
+
+      result.style.display = "block";
+      updateProgress();
+      result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function updateProgress() {
+      const boxes = [...plan.querySelectorAll('input[type="checkbox"]')];
+      const completed = boxes.filter(box => box.checked).length;
+      document.getElementById("progress").textContent =
+        `Progress: ${completed} of ${boxes.length} steps completed`;
+    }
+
+    document.getElementById("solve").addEventListener("click", () => {
+      makePlan(problemInput.value);
+    });
+
+    document.querySelectorAll(".example").forEach(button => {
+      button.addEventListener("click", () => {
+        problemInput.value = button.dataset.problem;
+        makePlan(button.dataset.problem);
+      });
+    });
+
+    document.getElementById("reset").addEventListener("click", () => {
+      result.style.display = "none";
+      problemInput.value = "";
+      problemInput.focus();
+    });
+
+    problemInput.addEventListener("keydown", event => {
+      if (event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+        makePlan(problemInput.value);
+      }
+    });
+  </script>
+</body>
+</html>
